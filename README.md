@@ -103,5 +103,58 @@ The key methodologies applied are:
 - **Gradio** → Build interactive UI for queries and results  
 
 ---
+## How the Model Works
+
+The system functions as a **Retrieval-Augmented Generation (RAG)** pipeline, orchestrating the interaction between a retrieval component and a generative LLM:
+
+1. **User Query**  
+   - The process begins when a user inputs a query into the Gradio interface, asking a specific question about a competitor's strategy or activities.
+
+2. **Query Embedding**  
+   - The user's query is passed to the same embedding model used for the competitor data chunks (`sentence-transformers/all-MiniLM-L6-v2`) to generate a query embedding (a vector representation).
+
+3. **Vector Similarity Search**  
+   - The query embedding is used to perform a similarity search against the embeddings of the competitor data chunks stored in the **ChromaDB** vector database.  
+   - The database returns the top `n_results` (e.g., 3) competitor data chunks whose embeddings are most similar to the query embedding.  
+   - These retrieved chunks are considered the most relevant information to answer the query.
+
+4. **Prompt Construction**  
+   - A detailed prompt is dynamically constructed, incorporating:  
+     - The user’s original query  
+     - The retrieved competitor data chunks  
+   - The prompt is engineered to instruct the LLM (acting as a *competitive intelligence analyst*) to produce actionable **sales and marketing counter-strategies**.
+
+5. **LLM Generation**  
+   - The constructed prompt is passed into the LLM (`distilgpt2` in this prototype).  
+   - The LLM uses its pre-trained knowledge and the retrieved competitor data to generate a **coherent and relevant response**.  
+   - Prompt design ensures the output is focused on **actionable strategies**, not just summaries.
+
+6. **Output**  
+   - The final response (counter-strategy) is presented to the user via the Gradio interface.  
+   - The interface also shows the retrieved competitor information, giving transparency into the basis for the generated strategies.
+
+---
+
+## Interpretation of Outputs
+
+Understanding the system's outputs involves analyzing both the **retrieved information** and the **generated strategy**:
+
+- **Retrieved Information**  
+  - Displays the specific competitor data the system considered most relevant.  
+  - Reviewing retrieved chunks helps validate relevance.  
+  - If retrieval is poor, issues may lie in the embedding model, chunking method, or retrieval settings (`n_results`).
+
+- **Generated Strategy (LLM Output)**  
+  - Synthesized counter-strategy derived from retrieved competitor information.  
+  - Evaluation involves checking:  
+    - **Actionability:** Are the suggestions specific, practical, and directly usable by sales/marketing teams?  
+    - **Relevance:** Does the strategy directly address the query and clearly tie to retrieved information?  
+    - **Avoiding Hallucinations:** Ensure the LLM doesn’t introduce unsupported or generic content.  
+    - **Sales vs. Marketing Differentiation:** Recommendations should distinguish between **sales tactics** (e.g., conversation points) and **marketing actions** (e.g., campaign messaging).  
+    - **Business Alignment:** While not business-specific, outputs should align with general competitive best practices.
+
+---
+
+⚡ This RAG approach ensures that while the LLM provides creativity and fluency, its answers remain **grounded in real competitor data** retrieved from the vector database.
 
 
