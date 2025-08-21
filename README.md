@@ -1,0 +1,1 @@
+# Competitive-Intelligence-and-Counter-Strategy-Generator--Gen-AI
